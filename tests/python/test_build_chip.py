@@ -4,7 +4,7 @@ import os
 import numpy as np
 import pytest
 
-from build_chip import FORMAT_VERSION, build, clean_ring, write
+from build_chip import FORMAT_VERSION, build, clean_ring
 from conftest import DATA, ROOT
 from common import signed_area
 
@@ -87,12 +87,36 @@ def test_islands_include_the_four_crosses(built):
         assert min(np.hypot(c[0] - q["x"], c[1] - q["y"]) for c in centres) < 5
 
 
-def test_committed_web_data_is_up_to_date(built, tmp_path):
+def layer_shapes(meta, xy):
+    """Each layer of web data as one shapely geometry."""
+    from shapely.geometry import Polygon
+    from shapely.ops import unary_union
+
+    rings = rings_of(meta, xy)
+    out = []
+    for layer in meta["layers"]:
+        k = layer["ringStart"]
+        polys = []
+        for n_holes in layer["polygons"]:
+            polys.append(Polygon(rings[k], [rings[k + h] for h in range(1, n_holes + 1)]))
+            k += 1 + n_holes
+        out.append(unary_union(polys))
+    return out
+
+
+def test_committed_web_data_is_up_to_date(built):
+    # Compared as geometry, not bytes: shapely/GEOS versions may start rings at a different vertex.
     meta, xy = built
-    write(meta, xy, tmp_path)
-    for name in ["chip.json", "chip.bin"]:
-        with open(os.path.join(tmp_path, name), "rb") as a, open(os.path.join(DATA, name), "rb") as b:
-            assert a.read() == b.read(), f"public/data/{name} is stale: run scripts/build_chip.py"
+    with open(os.path.join(DATA, "chip.json")) as f:
+        committed = json.load(f)
+    old = np.fromfile(os.path.join(DATA, "chip.bin"), dtype="<f4")
+    assert len(old) == committed["vertexCount"] * 2, "public/data/chip.bin does not match chip.json"
+    stale = "public/data is stale: run scripts/build_chip.py"
+    for key in ["version", "chip", "qubits", "bbox"]:
+        assert committed[key] == meta[key], stale
+    assert [(l["role"], l["polygons"]) for l in committed["layers"]] == [(l["role"], l["polygons"]) for l in meta["layers"]], stale
+    for new, ref in zip(layer_shapes(meta, xy), layer_shapes(committed, old.reshape(-1, 2))):
+        assert new.symmetric_difference(ref).area < 1e-6 * max(ref.area, 1.0), stale
 
 
 def test_design_json_matches_web_data(built):
