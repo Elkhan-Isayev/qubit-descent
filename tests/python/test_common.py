@@ -4,7 +4,7 @@ import gdstk
 import numpy as np
 import pytest
 
-from common import bbox, polygons_by_layer, read_gds, signed_area
+from common import bbox, merge_polygons, polygons_by_layer, read_gds, signed_area
 
 
 def make_lib(unit):
@@ -49,6 +49,17 @@ def test_rejects_ambiguous_top_cells():
     lib.new_cell("STRAY")
     with pytest.raises(ValueError, match="one top cell"):
         polygons_by_layer(lib)
+
+
+def test_merge_polygons_turns_strips_and_keyholes_into_holes():
+    # a 4 × 2 ground plane cut into two strips, with a 1 × 1 gap straddling the cut
+    left = np.array([[0, 0], [2, 0], [2, 0.5], [1.5, 0.5], [1.5, 1.5], [2, 1.5], [2, 2], [0, 2]], dtype=float)
+    right = np.array([[2, 0], [4, 0], [4, 2], [2, 2], [2, 1.5], [2.5, 1.5], [2.5, 0.5], [2, 0.5]], dtype=float)
+    merged = merge_polygons([left, right])
+    assert len(merged) == 1
+    outer, holes = merged[0]
+    assert signed_area(outer) == pytest.approx(8)
+    assert len(holes) == 1 and signed_area(holes[0]) == pytest.approx(-1)
 
 
 def test_signed_area():

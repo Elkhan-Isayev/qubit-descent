@@ -1,3 +1,4 @@
+import { loadChip } from './data.js';
 import { LEVELS, SOURCES } from './levels.js';
 import { LANGS, fmtDecimal, getLang, levelText, onLangChange, setLang, t, translateDom } from './i18n.js';
 import { DescentScene } from './scene.js';
@@ -143,7 +144,7 @@ function updateHud() {
   }
 }
 
-function main() {
+async function main() {
   buildLangSwitcher();
   translateDom();
   buildRuler();
@@ -154,8 +155,10 @@ function main() {
     updateHud();
   });
 
-  const scene = new DescentScene($('scene'));
+  const chip = await loadChip();
+  const scene = new DescentScene($('scene'), chip);
   if (!scene.renderer.capabilities.isWebGL2) throw new Error(t('webgl2'));
+  if (import.meta.env.DEV) window.__descent = { scene, state };
   window.addEventListener('resize', () => scene.resize());
   bindInput($('scene'));
 
@@ -175,9 +178,7 @@ function main() {
   for (const id of ['hud', 'card', 'ruler', 'nav']) $(id).classList.remove('hidden');
 }
 
-try {
-  main();
-} catch (err) {
+main().catch((err) => {
   console.error(err);
   document.querySelector('.loader-sub').textContent = `${t('error')}: ${err.message}`;
-}
+});

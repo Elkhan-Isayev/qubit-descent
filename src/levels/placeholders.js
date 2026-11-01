@@ -1,4 +1,4 @@
-// Stand-in geometry for each level until the real models land (fridge.js, chip.js, … — see docs/SPEC.md).
+// Stand-in geometry for the levels that do not have their real model yet (see docs/SPEC.md).
 // Each group is authored at unit size: 1 world unit = the level's span, the object fills ~0.8 of it.
 
 import * as THREE from 'three';
@@ -56,39 +56,6 @@ function samplePackage() {
     g.add(sma);
   }
   g.rotation.x = 0.5;
-  return g;
-}
-
-function chipLayout() {
-  const g = new THREE.Group();
-  const sub = new THREE.Mesh(new THREE.BoxGeometry(0.8, 0.8, 0.02), metal(SILICON, 0.3, { metalness: 0.3 }));
-  g.add(sub);
-  const line = glow(0x7fd3ff, 1.4);
-  for (const [x, y] of [[-0.2, -0.15], [0.2, -0.15], [-0.2, 0.2], [0.2, 0.2]]) {
-    const a = new THREE.Mesh(new THREE.BoxGeometry(0.12, 0.018, 0.004), line);
-    const b = new THREE.Mesh(new THREE.BoxGeometry(0.018, 0.12, 0.004), line);
-    a.position.set(x, y, 0.012);
-    b.position.set(x, y, 0.012);
-    g.add(a, b);
-    for (let k = 0; k < 5; k++) {
-      const m = new THREE.Mesh(new THREE.BoxGeometry(0.08, 0.004, 0.004), line);
-      m.position.set(x + 0.04 * (k % 2 ? 1 : -1) * 0.3, y + 0.09 + k * 0.012, 0.012);
-      g.add(m);
-    }
-  }
-  g.rotation.x = -0.55;
-  return g;
-}
-
-function transmon() {
-  const g = new THREE.Group();
-  const al = metal(ALUMINIUM, 0.25);
-  g.add(new THREE.Mesh(new THREE.BoxGeometry(0.7, 0.07, 0.02), al));
-  g.add(new THREE.Mesh(new THREE.BoxGeometry(0.07, 0.7, 0.02), al));
-  const jj = new THREE.Mesh(new THREE.SphereGeometry(0.012, 16, 16), glow(0xffb46b, 4));
-  jj.position.set(0, -0.38, 0.02);
-  g.add(jj);
-  g.rotation.x = -0.6;
   return g;
 }
 
@@ -160,7 +127,7 @@ function atom(span) {
   return g;
 }
 
-const BUILDERS = { fridge, package: samplePackage, chip: chipLayout, transmon, junction, barrier, atom };
+const BUILDERS = { fridge, package: samplePackage, junction, barrier, atom };
 
 export function buildPlaceholder(level) {
   const g = BUILDERS[level.id](level.span);

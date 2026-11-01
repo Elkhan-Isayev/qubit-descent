@@ -37,6 +37,12 @@ Cable lengths give realistic plate spacing for the procedural model. The same pa
 - Google Quantum AI, *Willow spec sheet* (2024-12-09), [PDF](https://quantumai.google/static/site-assets/downloads/willow-spec-sheet.pdf): **105 qubits**; mean T1 **68 ± 13 µs** (QEC chip), **98 ± 32 µs** (RCS chip). The caption must name the chip.
 - The Willow layout is **not** public. The chip we render is a Qiskit Metal design and is labeled "representative layout", not "Willow".
 
+#### Generated chip (levels 3–4)
+- `scripts/design_chip.py` builds our own 4 × 4 mm layout from Qiskit Metal library components: 4 × `TransmonCross` (Xmon), quarter-wave readout resonators (`RouteMeander`, 3.70–4.15 mm) coupled to a feedline via `CoupledLineTee`, nearest-neighbour buses, a drive line per qubit, and wire-bond launch pads. CPW: 10 µm trace, 6 µm gap.
+- Output: `data/chip.gds` (committed) and `data/chip_design.json` (qubit and junction positions). `scripts/build_chip.py` (gdstk + shapely, no Metal needed) merges each GDS layer into polygons with real holes and writes `public/data/chip.json` + `chip.bin` (~19 KiB).
+- Metal does not draw the junction itself, so its position is marked with a glow and the junction geometry comes from level 5.
+- Film and substrate thicknesses in 3D are exaggerated for visibility and never shown as numbers.
+
 ### Level 4 — Transmon
 - Geometry: the Qiskit Metal `TransmonCross` from section 1 (real parametric design).
 - Osman, A. et al. (2021). *Simplified Josephson-junction fabrication process for reproducibly high-performance superconducting qubits.* **Appl. Phys. Lett.** 118, 064002. [doi:10.1063/5.0037093](https://doi.org/10.1063/5.0037093); arXiv:2011.05230. Xmon qubits, mean T1 > 50 µs.

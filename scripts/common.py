@@ -43,3 +43,24 @@ def signed_area(points):
 
 def read_gds(path):
     return gdstk.read_gds(path)
+
+
+def merge_polygons(rings):
+    """Union GDS polygons into proper polygons with holes.
+
+    GDS has no holes: gdstk returns them as keyhole cuts, and big areas (the ground plane) as
+    strips. Returns [(outer, [hole, ...]), ...] as (n, 2) arrays without the closing vertex,
+    outer counter-clockwise and holes clockwise.
+    """
+    from shapely.geometry import Polygon
+    from shapely.geometry.polygon import orient
+    from shapely.ops import unary_union
+
+    merged = unary_union([Polygon(r).buffer(0) for r in rings])
+    out = []
+    for poly in getattr(merged, "geoms", [merged]):
+        if poly.is_empty:
+            continue
+        poly = orient(poly, sign=1.0)
+        out.append((np.asarray(poly.exterior.coords)[:-1], [np.asarray(h.coords)[:-1] for h in poly.interiors]))
+    return out

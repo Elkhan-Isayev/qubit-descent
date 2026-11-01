@@ -2,5 +2,6 @@
 #   python3.13 -m venv .venv-metal && .venv-metal/bin/pip install --only-binary=:all: -r requirements-pipeline.txt
 quantum-metal==0.9.0
 gdstk
+shapely
 numpy
 pytest

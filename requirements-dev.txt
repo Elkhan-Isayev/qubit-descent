@@ -1,4 +1,5 @@
 # Tests for the data pipeline (scripts/). Lightweight: runs in CI.
 numpy
 gdstk
+shapely
 pytest

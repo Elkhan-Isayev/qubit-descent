@@ -52,6 +52,40 @@ export function levelTransform(p, i) {
   };
 }
 
+// View centre (in a model's own units) while zooming through a model that spans several levels.
+// foci[i] is the point centred at level i, or null when the model has no focus for that level.
+// Between two foci the view zooms into a fixed point: the next focus is approached linearly in span,
+// so it lands exactly on screen centre as the span reaches the next level.
+export function zoomCentre(p, foci) {
+  const u = clamp(p) * LAST;
+  const i = Math.min(Math.floor(u), LAST - 1);
+  const a = foci[i];
+  const b = foci[i + 1];
+  if (a && b) {
+    const s = spanAt(p);
+    const t = (s - LEVELS[i + 1].span) / (LEVELS[i].span - LEVELS[i + 1].span);
+    return [b[0] + (a[0] - b[0]) * t, b[1] + (a[1] - b[1]) * t];
+  }
+  // outside the model's range: hold the nearest focus
+  let best = null;
+  let bestD = Infinity;
+  foci.forEach((f, k) => {
+    if (f && Math.abs(k - u) < bestD) [best, bestD] = [f, Math.abs(k - u)];
+  });
+  return best ?? [0, 0];
+}
+
+// Opacity of a model drawn on a contiguous run of levels: solid across the run, cross-fading only
+// at its ends like a single level.
+export function modelOpacity(p, levelIndices) {
+  const first = Math.min(...levelIndices);
+  const last = Math.max(...levelIndices);
+  const u = clamp(p) * LAST;
+  if (u < first) return levelTransform(p, first).opacity;
+  if (u > last) return levelTransform(p, last).opacity;
+  return 1;
+}
+
 const UNITS = [
   ['m', 1],
   ['cm', 1e-2],

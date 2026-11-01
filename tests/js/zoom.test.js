@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import { LEVELS } from '../../src/levels.js';
-import { FADE_OUT, formatLength, levelAt, levelProgress, levelTransform, progressForSpan, spanAt, stepLevel } from '../../src/zoom.js';
+import { FADE_OUT, formatLength, levelAt, levelProgress, levelTransform, modelOpacity, progressForSpan, spanAt, stepLevel, zoomCentre } from '../../src/zoom.js';
 
 const N = LEVELS.length;
 const close = (a, b, rel = 1e-9) => expect(Math.abs(a - b) / Math.abs(b)).toBeLessThan(rel);
@@ -76,6 +76,54 @@ describe('levels', () => {
     expect(outer.opacity).toBeCloseTo(0.5, 10);
     expect(inner.opacity).toBeGreaterThan(0);
     expect(levelTransform(levelProgress(1) + FADE_OUT / (N - 1), 1).opacity).toBeCloseTo(0, 12);
+  });
+});
+
+describe('zooming into a point of a multi-level model', () => {
+  // a model drawn on levels 2 and 3 (chip, transmon) with a third focus for level 4 (junction)
+  const foci = LEVELS.map(() => null);
+  foci[2] = [0, 0];
+  foci[3] = [-400, -550];
+  foci[4] = [-400, -760];
+
+  it('centres each focus exactly at its own level', () => {
+    for (const i of [2, 3, 4]) {
+      const [x, y] = zoomCentre(levelProgress(i), foci);
+      expect(x).toBeCloseTo(foci[i][0], 9);
+      expect(y).toBeCloseTo(foci[i][1], 9);
+    }
+  });
+
+  it('keeps the target point fixed on screen while zooming in', () => {
+    // screen position of the target = (target - centre) / span must shrink monotonically to 0
+    const [tx, ty] = foci[3];
+    let prev = Infinity;
+    for (let k = 0; k <= 50; k++) {
+      const p = levelProgress(2) + (k / 50) * (levelProgress(3) - levelProgress(2));
+      const [cx, cy] = zoomCentre(p, foci);
+      const s = spanAt(p) * 1e6; // µm
+      const d = Math.hypot(tx - cx, ty - cy) / s;
+      expect(d).toBeLessThanOrEqual(prev + 1e-12);
+      prev = d;
+    }
+    expect(prev).toBe(0);
+  });
+
+  it('holds the nearest focus outside the model range', () => {
+    expect(zoomCentre(0, foci)).toEqual([0, 0]);
+    expect(zoomCentre(1, foci)).toEqual([-400, -760]);
+    expect(zoomCentre(0.3, LEVELS.map(() => null))).toEqual([0, 0]);
+  });
+
+  it('a model is as visible as its most visible level', () => {
+    expect(modelOpacity(levelProgress(2), [2, 3])).toBe(1);
+    expect(modelOpacity(levelProgress(3), [2, 3])).toBe(1);
+    const between = (levelProgress(2) + levelProgress(3)) / 2;
+    expect(modelOpacity(between, [2, 3])).toBe(1);
+    expect(modelOpacity(levelProgress(5), [2, 3])).toBe(0);
+    // fades in and out like a single level at the ends of its run
+    expect(modelOpacity(levelProgress(1.5), [2, 3])).toBe(levelTransform(levelProgress(1.5), 2).opacity);
+    expect(modelOpacity(levelProgress(3.2), [2, 3])).toBe(levelTransform(levelProgress(3.2), 3).opacity);
   });
 });
 
