@@ -53,7 +53,7 @@ export function holderPosition() {
 export function buildFridge(holder, holderTilt) {
   const g = new THREE.Group();
   g.name = 'fridge';
-  const gold = metal(0xc8892f, 0.32);
+  const gold = metal(0xb5701c, 0.3);
   const steel = metal(0xa3abb5, 0.38);
   const copper = metal(0xc0764a, 0.32);
   const coax = metal(0xb9c3cf, 0.3);

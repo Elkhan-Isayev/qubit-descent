@@ -146,6 +146,12 @@ body.fab-on #card { opacity: 0; pointer-events: none; }
 .credits-panel p { font-size: 14px; line-height: 1.55; color: #cbd6e6; }
 #credits-list { padding-left: 18px; font-size: 13.5px; line-height: 1.8; }
 #credits-close { position: absolute; top: 16px; right: 16px; }
+.credits-tools { font-size: 12.5px !important; color: var(--muted) !important; }
+
+/* short desktop windows: keep the ruler clear of the HUD */
+@media (max-height: 700px) and (min-width: 721px) {
+  #ruler { top: 56%; height: 32vh; }
+}
 
 /* ---------- phone ---------- */
 @media (max-width: 720px) {

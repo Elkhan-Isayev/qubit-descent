@@ -11,7 +11,7 @@ export const SOURCES = {
     label: 'Google Quantum AI, Willow spec sheet (2024)',
     url: 'https://quantumai.google/static/site-assets/downloads/willow-spec-sheet.pdf',
   },
-  acharya2025: {
+  willow2025: {
     label: 'Google Quantum AI (2025), Nature 638, 920–926',
     url: 'https://doi.org/10.1038/s41586-024-08449-y',
   },
@@ -68,7 +68,7 @@ export const LEVELS = [
       ['fD7Qubits', '101'],
       ['fD7Error', '0.143 %'],
     ],
-    sources: ['qiskitMetal', 'acharya2025'],
+    sources: ['qiskitMetal', 'willow2025'],
   },
   {
     id: 'transmon',

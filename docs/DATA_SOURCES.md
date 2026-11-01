@@ -33,7 +33,7 @@ Cable lengths give realistic plate spacing for the procedural model. The same pa
 - **Unverified:** "~3 m tall". The paper gives only stage-to-stage spacing (≈1 m total from 50K plate to MXC). Proposal: the HUD shows "≈1 m from the 50K plate to the MXC", taken from the cable lengths, instead of "3 m".
 
 ### Level 2–3 — Chip (reference: Google Willow)
-- Acharya, R. et al. (Google Quantum AI) (2025). *Quantum error correction below the surface code threshold.* **Nature** 638, 920–926. [doi:10.1038/s41586-024-08449-y](https://doi.org/10.1038/s41586-024-08449-y); arXiv:2408.13687 (CC BY 4.0). Distance-7 surface code on **101 qubits** (49 data + 48 measure + 4 leakage-removal), **0.143 % ± 0.003 %** logical error per cycle, Λ = 2.14 ± 0.02.
+- Google Quantum AI and Collaborators (2025; online 2024-12-09). *Quantum error correction below the surface code threshold.* **Nature** 638, 920–926. [doi:10.1038/s41586-024-08449-y](https://doi.org/10.1038/s41586-024-08449-y); arXiv:2408.13687 (CC BY 4.0). Distance-7 surface code on **101 qubits** (49 data + 48 measure + 4 leakage-removal), **0.143 % ± 0.003 %** logical error per cycle, Λ = 2.14 ± 0.02.
 - Google Quantum AI, *Willow spec sheet* (2024-12-09), [PDF](https://quantumai.google/static/site-assets/downloads/willow-spec-sheet.pdf): **105 qubits**; mean T1 **68 ± 13 µs** (QEC chip), **98 ± 32 µs** (RCS chip). The caption must name the chip.
 - The Willow layout is **not** public. The chip we render is a Qiskit Metal design and is labeled "representative layout", not "Willow".
 
