@@ -1,6 +1,6 @@
 import { loadChip } from './data.js';
 import { LEVELS, SOURCES } from './levels.js';
-import { LANGS, fabStepText, fmtDecimal, getLang, levelText, onLangChange, setLang, t, translateDom } from './i18n.js';
+import { LANGS, fabStepText, fmtDecimal, getLang, levelText, onLangChange, setLang, t, translateDom, unitHint } from './i18n.js';
 import { STEPS as FAB_STEPS, TOTAL as FAB_TOTAL } from './fabrication.js';
 import { DescentScene } from './scene.js';
 import { clamp, formatLength, levelAt, levelProgress, spanAt, stepLevel } from './zoom.js';
@@ -73,7 +73,7 @@ function renderCard(i, animate) {
     $('fab-play').querySelector('span').textContent = t('fabPlay');
     $('card-facts-title').textContent = level.factsTitle ? t(level.factsTitle) : '';
     $('card-facts-title').classList.toggle('none', !level.factsTitle);
-    $('card-facts').innerHTML = level.facts.map(([k, v]) => `<dt>${t(k)}</dt><dd>${fmtDecimal(v)}</dd>`).join('');
+    $('card-facts').innerHTML = level.facts.map(([k, v]) => `<dt>${t(k)}</dt><dd${tip(v)}>${fmtDecimal(v)}</dd>`).join('');
     $('card-sources').innerHTML = level.sources
       .map((id) => `<a href="${SOURCES[id].url}" target="_blank" rel="noopener">${SOURCES[id].label}</a>`)
       .join('');
@@ -142,6 +142,12 @@ function toggleCredits(open) {
   $('credits').classList.toggle('hidden', !open);
 }
 
+// data-tip attribute with the unit spelled out (see .tip in style.css); empty when the value has no unit.
+const tip = (value) => {
+  const hint = unitHint(value);
+  return hint ? ` class="tip" tabindex="0" data-tip="${hint}"` : '';
+};
+
 // Labels pinned to 3D points (e.g. the fridge stages): created on first use, re-translated on language change.
 const labelEls = new Map();
 function renderLabels(labels) {
@@ -153,7 +159,7 @@ function renderLabels(labels) {
       $('labels').appendChild(el);
       labelEls.set(l.key, el);
     }
-    const html = `<span>${t(l.key)}</span><b>${fmtDecimal(l.text)}</b>`;
+    const html = `<span>${t(l.key)}</span><b${tip(l.text)}>${fmtDecimal(l.text)}</b>`;
     if (el.dataset.html !== html) el.innerHTML = el.dataset.html = html;
     el.style.opacity = l.opacity;
     el.style.transform = l.opacity > 0.01 ? `translate(${l.x.toFixed(1)}px, ${l.y.toFixed(1)}px) translateY(-50%)` : 'translate(-9999px, 0)';
@@ -189,6 +195,7 @@ function updateHud(span = spanAt(state.progress)) {
   const { value, unit } = formatLength(span);
   $('scale-value').textContent = fmtDecimal(value);
   $('scale-unit').textContent = unit;
+  $('scale-unit').dataset.tip = unitHint(unit);
   $('ruler-head').style.top = `${state.progress * 100}%`;
   const i = levelAt(state.progress);
   if (i !== state.level) {

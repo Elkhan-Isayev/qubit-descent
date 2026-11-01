@@ -76,6 +76,35 @@ describe('dictionaries are complete', () => {
   });
 });
 
+describe('unit hints', () => {
+  it('spells out kelvin and gives degrees Celsius for a single temperature', async () => {
+    const { unitHint } = await freshI18n('?lang=ru');
+    expect(unitHint('35 K')).toBe('кельвины · ≈ −238 °C · 0 K — абсолютный ноль');
+    expect(unitHint('6 mK')).toBe('милликельвины, 0,001 K · ≈ −273,14 °C · 0 K — абсолютный ноль');
+    expect(unitHint('300 K')).toContain('≈ 27 °C');
+  });
+
+  it('names other units without a conversion and ignores unitless values', async () => {
+    const { unitHint } = await freshI18n();
+    expect(unitHint('68 ± 13 µs')).toBe('microseconds, a millionth of a second');
+    expect(unitHint('0.01–0.16 µm²')).toBe('square micrometres');
+    expect(unitHint('nm')).toMatch(/^nanometres/);
+    for (const v of ['105', '0.143 %', 'Al / AlOx / Al']) expect(unitHint(v)).toBeNull();
+  });
+
+  it('has a hint for every fact, label and ruler unit in every language', async () => {
+    const { DICTIONARIES } = await freshI18n();
+    const keys = Object.keys(DICTIONARIES.UNIT_NAMES.en);
+    for (const code of CODES) expect(Object.keys(DICTIONARIES.UNIT_NAMES[code])).toEqual(keys);
+    for (const code of CODES) {
+      const { unitHint } = await freshI18n(`?lang=${code}`);
+      for (const level of LEVELS)
+        for (const [, v] of level.facts) if (/[a-zµ²]$/i.test(v) && !v.endsWith('Al')) expect(unitHint(v), `${code} ${v}`).toBeTruthy();
+      for (const u of ['m', 'cm', 'mm', 'µm', 'nm', 'pm']) expect(unitHint(u), `${code} ${u}`).toBeTruthy();
+    }
+  });
+});
+
 describe('levels and sources', () => {
   it('every level cites at least one known source, and every source is used', () => {
     const used = new Set();

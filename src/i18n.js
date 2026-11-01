@@ -260,7 +260,35 @@ const FAB_STEPS = {
   ],
 };
 
-export const DICTIONARIES = { UI, LEVEL_TEXT, FAB_STEPS };
+// Names of the units shown on screen, for the hover hints. `zero` is added to temperature hints.
+const UNIT_NAMES = {
+  en: {
+    K: 'kelvin', mK: 'millikelvin, 0.001 K', zero: '0 K is absolute zero',
+    m: 'metres', cm: 'centimetres', mm: 'millimetres', 'µm': 'micrometres, a millionth of a metre',
+    nm: 'nanometres, a billionth of a metre', pm: 'picometres, a trillionth of a metre',
+    'µm²': 'square micrometres', 'µs': 'microseconds, a millionth of a second',
+  },
+  az: {
+    K: 'kelvin', mK: 'millikelvin, 0.001 K', zero: '0 K mütləq sıfırdır',
+    m: 'metr', cm: 'santimetr', mm: 'millimetr', 'µm': 'mikrometr, metrin milyonda biri',
+    nm: 'nanometr, metrin milyardda biri', pm: 'pikometr, metrin trilyonda biri',
+    'µm²': 'kvadrat mikrometr', 'µs': 'mikrosaniyə, saniyənin milyonda biri',
+  },
+  de: {
+    K: 'Kelvin', mK: 'Millikelvin, 0.001 K', zero: '0 K ist der absolute Nullpunkt',
+    m: 'Meter', cm: 'Zentimeter', mm: 'Millimeter', 'µm': 'Mikrometer, ein millionstel Meter',
+    nm: 'Nanometer, ein milliardstel Meter', pm: 'Pikometer, ein billionstel Meter',
+    'µm²': 'Quadratmikrometer', 'µs': 'Mikrosekunden, eine millionstel Sekunde',
+  },
+  ru: {
+    K: 'кельвины', mK: 'милликельвины, 0.001 K', zero: '0 K — абсолютный ноль',
+    m: 'метры', cm: 'сантиметры', mm: 'миллиметры', 'µm': 'микрометры, миллионные доли метра',
+    nm: 'нанометры, миллиардные доли метра', pm: 'пикометры, триллионные доли метра',
+    'µm²': 'квадратные микрометры', 'µs': 'микросекунды, миллионные доли секунды',
+  },
+};
+
+export const DICTIONARIES = { UI, LEVEL_TEXT, FAB_STEPS, UNIT_NAMES };
 
 const STORAGE_KEY = 'qubit-descent-lang';
 const listeners = new Set();
@@ -310,6 +338,22 @@ export const fabStepText = (i) => (FAB_STEPS[current] ?? FAB_STEPS.en)[i];
 
 // Decimal comma in az/de/ru. (Explicit separator: not every browser ships ICU data for az.)
 export const fmtDecimal = (s) => (current === 'en' ? s : s.replace(/(\d)\.(\d)/g, '$1,$2'));
+
+// Hover hint for a value such as '35 K', '6 mK' or '68 ± 13 µs': the unit spelled out, and for a single
+// temperature its value in degrees Celsius. A bare unit ('nm') works too. Null when there is no unit.
+export function unitHint(value) {
+  const m = /(?:^|[\s\d])(mK|K|µm²|µm|µs|nm|pm|mm|cm|m)$/.exec(value.trim());
+  if (!m) return null;
+  const names = UNIT_NAMES[current] ?? UNIT_NAMES.en;
+  const parts = [names[m[1]]];
+  const single = /^([\d.]+)\s*(mK|K)$/.exec(value.trim());
+  if (single) {
+    const c = Number(single[1]) * (single[2] === 'mK' ? 1e-3 : 1) - 273.15;
+    const s = Math.abs(c) < 250 ? Math.round(c).toString() : c.toFixed(2);
+    parts.push(`≈ ${s.replace('-', '−')} °C`, names.zero);
+  }
+  return fmtDecimal(parts.join(' · '));
+}
 
 // Apply translations to static markup: data-i18n (text), data-i18n-html, data-i18n-title.
 export function translateDom(root = document) {
