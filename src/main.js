@@ -71,6 +71,8 @@ function renderCard(i, animate) {
     $('card-fab-text').textContent = fab ?? '';
     $('fab-play').classList.toggle('hidden', i !== JUNCTION);
     $('fab-play').querySelector('span').textContent = t('fabPlay');
+    $('card-facts-title').textContent = level.factsTitle ? t(level.factsTitle) : '';
+    $('card-facts-title').classList.toggle('none', !level.factsTitle);
     $('card-facts').innerHTML = level.facts.map(([k, v]) => `<dt>${t(k)}</dt><dd>${fmtDecimal(v)}</dd>`).join('');
     $('card-sources').innerHTML = level.sources
       .map((id) => `<a href="${SOURCES[id].url}" target="_blank" rel="noopener">${SOURCES[id].label}</a>`)

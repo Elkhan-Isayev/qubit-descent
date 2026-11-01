@@ -71,7 +71,8 @@ describe('dictionaries are complete', () => {
   it('every fact label is translated', async () => {
     const { DICTIONARIES } = await freshI18n();
     for (const level of LEVELS)
-      for (const [key] of level.facts) for (const code of CODES) expect(DICTIONARIES.UI[code][key], `${code}.${key}`).toBeTruthy();
+      for (const key of [level.factsTitle, ...level.facts.map(([k]) => k)].filter(Boolean))
+        for (const code of CODES) expect(DICTIONARIES.UI[code][key], `${code}.${key}`).toBeTruthy();
   });
 });
 

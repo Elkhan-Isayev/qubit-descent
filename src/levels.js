@@ -42,10 +42,12 @@ export const SOURCES = {
 };
 
 // facts: [i18n key of the label, value]. Values are language-neutral (units are SI symbols).
+// factsTitle: optional i18n key of a heading that says what the values are.
 export const LEVELS = [
   {
     id: 'fridge',
     span: 2,
+    factsTitle: 'fTemps',
     facts: [
       ['f50k', '35 K'],
       ['f4k', '2.85 K'],
