@@ -25,6 +25,9 @@ const UI = {
     credits: 'Data sources',
     close: 'Close',
     creditsIntro: 'Every number on screen comes from a peer-reviewed paper or an official specification. Chip and qubit geometry is generated with Qiskit Metal; no figures from papers are reproduced.',
+    fabPlay: 'Watch it being made',
+    fabStop: 'Stop',
+    fabStep: (i, n) => `Step ${i} of ${n}`,
     language: 'Language',
     fRoom: 'Room temperature',
     f50k: '50K plate',
@@ -61,6 +64,9 @@ const UI = {
     credits: 'Məlumat mənbələri',
     close: 'Bağla',
     creditsIntro: 'Ekrandakı hər rəqəm resenziyalı məqalədən və ya rəsmi spesifikasiyadan götürülüb. Çip və kubit həndəsəsi Qiskit Metal ilə yaradılıb; məqalələrdən heç bir şəkil köçürülməyib.',
+    fabPlay: 'Necə hazırlandığına baxın',
+    fabStop: 'Dayandır',
+    fabStep: (i, n) => `Addım ${i} / ${n}`,
     language: 'Dil',
     fRoom: 'Otaq temperaturu',
     f50k: '50K lövhəsi',
@@ -97,6 +103,9 @@ const UI = {
     credits: 'Datenquellen',
     close: 'Schließen',
     creditsIntro: 'Jede Zahl auf dem Bildschirm stammt aus einer begutachteten Veröffentlichung oder einem offiziellen Datenblatt. Die Chip- und Qubit-Geometrie wird mit Qiskit Metal erzeugt; Abbildungen aus Veröffentlichungen werden nicht übernommen.',
+    fabPlay: 'Herstellung ansehen',
+    fabStop: 'Stopp',
+    fabStep: (i, n) => `Schritt ${i} von ${n}`,
     language: 'Sprache',
     fRoom: 'Raumtemperatur',
     f50k: '50K-Stufe',
@@ -133,6 +142,9 @@ const UI = {
     credits: 'Источники данных',
     close: 'Закрыть',
     creditsIntro: 'Каждая цифра на экране взята из рецензируемой статьи или официальной спецификации. Геометрия чипа и кубита построена в Qiskit Metal; иллюстрации из статей не копируются.',
+    fabPlay: 'Смотреть, как его делают',
+    fabStop: 'Стоп',
+    fabStep: (i, n) => `Шаг ${i} из ${n}`,
     language: 'Язык',
     fRoom: 'Комнатная температура',
     f50k: 'Ступень 50K',
@@ -200,7 +212,51 @@ const LEVEL_TEXT = {
   },
 };
 
-export const DICTIONARIES = { UI, LEVEL_TEXT };
+// Captions of the junction fabrication animation (fabrication.js STEPS), in order.
+const FAB_STEPS = {
+  en: [
+    'Two layers of resist are spun onto the chip',
+    'An electron beam writes the two openings and the bridge between them',
+    'Development dissolves the exposed resist; the soft lower layer is cut back, so the bridge hangs free',
+    'Aluminium is evaporated at the first angle: it lands shifted, partly under the bridge',
+    'Oxygen is let into the chamber: a nanometre-thin AlOx barrier grows on the fresh aluminium',
+    'Aluminium from the opposite angle: the second film lands on the first, right under the bridge',
+    'Lift-off: a solvent removes the resist together with all the metal on top of it',
+    'Only the two films remain. Where they overlap, under the former bridge, is the junction',
+  ],
+  az: [
+    'Çipin üzərinə iki qat rezist çəkilir',
+    'Elektron şüası iki açılışı və onların arasındakı körpünü yazır',
+    'İşlənmə şüalanmış rezisti həll edir; yumşaq alt qat geri kəsilir və körpü havada asılı qalır',
+    'Alüminium birinci bucaq altında tozlandırılır: körpünün qismən altına, sürüşmüş halda düşür',
+    'Kameraya oksigen verilir: təzə alüminiumun üzərində nanometr qalınlığında AlOx baryeri yaranır',
+    'Əks bucaqdan alüminium: ikinci təbəqə düz körpünün altında birincinin üzərinə düşür',
+    '"Lift-off": həlledici rezisti onun üstündəki bütün metalla birlikdə aparır',
+    'Yalnız iki təbəqə qalır. Keçmiş körpünün altında üst-üstə düşdükləri yer — Cozefson keçididir',
+  ],
+  de: [
+    'Zwei Lackschichten werden auf den Chip geschleudert',
+    'Ein Elektronenstrahl schreibt die beiden Öffnungen und die Brücke dazwischen',
+    'Die Entwicklung löst den belichteten Lack; die weiche untere Schicht weicht zurück, die Brücke schwebt frei',
+    'Aluminium wird unter dem ersten Winkel aufgedampft: Es landet versetzt, teils unter der Brücke',
+    'Sauerstoff strömt in die Kammer: Auf dem frischen Aluminium wächst eine nanometerdünne AlOx-Barriere',
+    'Aluminium aus dem Gegenwinkel: Die zweite Schicht landet direkt unter der Brücke auf der ersten',
+    'Lift-off: Ein Lösungsmittel entfernt den Lack samt allem Metall darauf',
+    'Nur die beiden Schichten bleiben. Wo sie sich unter der früheren Brücke überlappen, liegt der Kontakt',
+  ],
+  ru: [
+    'На чип наносят два слоя резиста',
+    'Электронный луч рисует два окна и мостик между ними',
+    'Проявление растворяет засвеченный резист; мягкий нижний слой подтравливается, и мостик повисает в воздухе',
+    'Алюминий напыляют под первым углом: он ложится со сдвигом, частично под мостик',
+    'В камеру впускают кислород: на свежем алюминии растёт барьер AlOx толщиной в нанометр',
+    'Алюминий под противоположным углом: второй слой ложится на первый прямо под мостиком',
+    'Lift-off: растворитель смывает резист вместе со всем металлом на нём',
+    'Остаются только два слоя. Там, где они перекрываются под бывшим мостиком, и есть переход',
+  ],
+};
+
+export const DICTIONARIES = { UI, LEVEL_TEXT, FAB_STEPS };
 
 const STORAGE_KEY = 'qubit-descent-lang';
 const listeners = new Set();
@@ -245,6 +301,8 @@ export function levelText(id) {
   const [name, text, fab] = LEVEL_TEXT[id]?.[current] ?? LEVEL_TEXT[id]?.en ?? [id, '', null];
   return { name, text, fab };
 }
+
+export const fabStepText = (i) => (FAB_STEPS[current] ?? FAB_STEPS.en)[i];
 
 // Decimal comma in az/de/ru. (Explicit separator: not every browser ships ICU data for az.)
 export const fmtDecimal = (s) => (current === 'en' ? s : s.replace(/(\d)\.(\d)/g, '$1,$2'));

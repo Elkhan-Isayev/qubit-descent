@@ -145,3 +145,17 @@ describe('formatting and switching', () => {
     expect(i18n.levelText('nowhere').name).toBe('nowhere');
   });
 });
+
+describe('fabrication captions', () => {
+  it('have one caption per animation step in every language, translated', async () => {
+    const { DICTIONARIES } = await freshI18n();
+    const { STEPS } = await import('../../src/fabrication.js');
+    for (const code of CODES) {
+      expect(DICTIONARIES.FAB_STEPS[code]).toHaveLength(STEPS.length);
+      DICTIONARIES.FAB_STEPS[code].forEach((s, i) => {
+        expect(s.length, `${code}[${i}]`).toBeGreaterThan(20);
+        if (code !== 'en') expect(s).not.toBe(DICTIONARIES.FAB_STEPS.en[i]);
+      });
+    }
+  });
+});

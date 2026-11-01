@@ -2,11 +2,11 @@
 
 import * as THREE from 'three';
 
-export function collectMaterials(object) {
-  const out = [];
-  object.traverse((o) => {
-    if (o.material) for (const m of [o.material].flat()) if (!out.includes(m)) out.push(m);
-  });
+// Materials of an object and its descendants, skipping subtrees marked userData.noFade.
+export function collectMaterials(object, out = []) {
+  if (object.userData.noFade) return out;
+  if (object.material) for (const m of [object.material].flat()) if (!out.includes(m)) out.push(m);
+  for (const child of object.children) collectMaterials(child, out);
   return out;
 }
 

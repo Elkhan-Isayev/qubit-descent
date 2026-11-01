@@ -87,6 +87,29 @@ canvas#scene { position: fixed; inset: 0; width: 100%; height: 100%; display: bl
 #card-sources a { display: block; text-decoration: none; }
 #card-sources a:hover { text-decoration: underline; }
 
+.fab-btn {
+  margin-top: 10px; display: inline-flex; align-items: center; gap: 8px; padding: 7px 14px 7px 11px;
+  border-radius: 999px; border: 1px solid rgba(255, 180, 107, 0.45); background: rgba(255, 180, 107, 0.12);
+  color: var(--warm); font-size: 12.5px; font-weight: 600; cursor: pointer; transition: opacity 0.3s;
+}
+.fab-btn:hover { background: rgba(255, 180, 107, 0.22); }
+.fab-btn.hidden { display: none; }
+
+/* ---------- fabrication caption ---------- */
+#fab-caption {
+  position: fixed; left: 50%; bottom: 84px; transform: translateX(-50%); z-index: 11;
+  width: min(560px, calc(100vw - 32px)); padding: 12px 16px 12px; border-radius: 14px;
+  background: var(--glass-strong); border: 1px solid rgba(255, 180, 107, 0.3);
+  backdrop-filter: blur(14px); -webkit-backdrop-filter: blur(14px); transition: opacity 0.4s ease;
+}
+body.fab-on #card { opacity: 0; pointer-events: none; }
+.fab-head { display: flex; justify-content: space-between; align-items: center; }
+.fab-head .text-btn { padding: 0; }
+.fab-step { font-family: var(--mono); font-size: 11px; letter-spacing: 0.12em; text-transform: uppercase; color: var(--warm); }
+#fab-text { margin: 4px 0 10px; font-size: 14px; line-height: 1.45; }
+.fab-bar { height: 3px; border-radius: 3px; background: rgba(255, 255, 255, 0.08); overflow: hidden; }
+.fab-bar i { display: block; height: 100%; width: 0; background: linear-gradient(90deg, #ffb46b, #ffd9a8); }
+
 /* ---------- ruler ---------- */
 #ruler { position: fixed; left: 30px; top: 50%; transform: translateY(-30%); height: 40vh; z-index: 9; transition: opacity 0.8s ease; }
 #ruler-track { position: absolute; left: 0; top: 0; bottom: 0; width: 2px; background: var(--line); }
@@ -138,4 +161,6 @@ canvas#scene { position: fixed; inset: 0; width: 100%; height: 100%; display: bl
   #card p { font-size: 13px; }
   #nav { bottom: 14px; max-width: calc(100vw - 32px); }
   .hint { display: none; }
+  #fab-caption { bottom: 80px; z-index: 12; }
+  #fab-text { font-size: 13px; }
 }

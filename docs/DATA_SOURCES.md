@@ -73,6 +73,7 @@ Cable lengths give realistic plate spacing for the procedural model. The same pa
 | 2 | Holder, board, SMA connectors, bond wires (Ø 25 µm) | illustrative | Pad positions come from the chip's launch pads |
 | 5 | Junction overlap | 200 × 200 nm = 0.04 µm² | Inside 0.01–0.16 µm² (Osman et al. 2021) |
 | 5 | Electrode thicknesses 30 / 50 nm, oxide 2 nm | illustrative | — |
+| 5 | Dolan process (animation and final shape): bridge 200 nm, lower resist 400 nm, upper 150 nm, undercut 350 nm, evaporation angle ±26.6° | illustrative; the angle follows from Δ = h·tan θ with Δ = 200 nm, so the films overlap exactly under the bridge | Method: Dolan 1977. The ghost copies along the leads are what double-angle evaporation through both openings produces |
 | 6 | Barrier thickness field | smooth random surface scaled to exactly 1–2 nm; thinnest 7 % = hot spots | Zeng et al. 2015 (~1–2 nm, < 10 % of the area carries the current) |
 | 6 | Al lattice constant | 0.405 nm (fcc) | Standard crystallographic value for aluminium |
 | 6 | Oxide density | 88 atoms/nm³ (amorphous Al₂O₃ at ~3 g/cm³), Al : O = 2 : 3 | Stoichiometry; density approximate |

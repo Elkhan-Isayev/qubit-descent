@@ -63,12 +63,14 @@ export function buildChipModel(chip) {
   // it is from afar (shrunk away as the junction itself becomes visible).
   const marker = new THREE.MeshStandardMaterial({ color: 0x000000, emissive: 0xffb46b, emissiveIntensity: 3 });
   const markers = [];
+  const junctions = {};
   for (const q of chip.qubits) {
     if (!q.junction) continue;
     const jj = buildJunction(q.junction.width / NM);
     jj.scale.setScalar(NM);
     jj.position.set(q.junction.x, q.junction.y, BOTTOM_T * NM); // electrode bottoms on the substrate
     g.add(jj);
+    junctions[q.name] = jj;
     const dot = new THREE.Mesh(new THREE.SphereGeometry(1, 20, 12), marker);
     dot.position.set(q.junction.x, q.junction.y, FILM_UM);
     g.add(dot);
@@ -82,7 +84,7 @@ export function buildChipModel(chip) {
       d.scale.setScalar(Math.max(r, 1e-6));
     }
   };
-  return { object: g, update };
+  return { object: g, update, junctions };
 }
 
 // Foci per level id, in µm: the chip centre, the qubit, its junction, and the tunnel barrier in it.

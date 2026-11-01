@@ -7,7 +7,8 @@ import { RoomEnvironment } from 'three/examples/jsm/environments/RoomEnvironment
 import { LEVELS } from './levels.js';
 import { buildAtom } from './levels/atom.js';
 import { buildBarrier } from './levels/barrier.js';
-import { buildChipModel, chipFoci } from './levels/chip.js';
+import { FOCUS_QUBIT, buildChipModel, chipFoci } from './levels/chip.js';
+import { CUTAWAY_VIEW, Fabrication } from './fabrication.js';
 import { buildFridge } from './levels/fridge.js';
 import { buildPackage } from './levels/package.js';
 import { collectMaterials, nestedCopy } from './levels/util.js';
@@ -52,6 +53,13 @@ export class DescentScene {
     const chipModel = buildChipModel(chip);
     const chipInHolder = nestedCopy(chipModel.object);
     chipInHolder.scale.setScalar(1e-3); // µm → mm
+    // the fabrication animation plays on the focus qubit's junction, in its place
+    const jj = chipModel.junctions[FOCUS_QUBIT];
+    const gapNm = chip.qubits.find((q) => q.name === FOCUS_QUBIT).junction.width * 1000;
+    this.fab = new Fabrication(gapNm);
+    this.fab.object.position.copy(jj.position);
+    this.fab.object.scale.copy(jj.scale);
+    chipModel.object.add(this.fab.object);
     const fridge = buildFridge(buildPackage(chip, chipInHolder), CHIP_TILT - FRIDGE_TILT);
     const barrier = buildBarrier();
     const atom = buildAtom();
@@ -69,7 +77,13 @@ export class DescentScene {
         units: 1e-6,
         foci: chipFoci(chip),
         tilt: descentTilt,
-        update: ({ span }) => chipModel.update(span),
+        // during the fabrication animation, turn into the cutaway view
+        orient: (q) => this.fab.blend > 0 && q.slerp(CUTAWAY_VIEW, this.fab.blend),
+        update: ({ span, dt }) => {
+          chipModel.update(span);
+          this.fab.update(dt);
+          jj.visible = !this.fab.playing;
+        },
       }),
       this.addModel(barrier.object, {
         levels: ['barrier'],
@@ -97,7 +111,7 @@ export class DescentScene {
     this.resize();
   }
 
-  addModel(object, { levels, units, foci, tilt, update = null, anchors = [] }) {
+  addModel(object, { levels, units, foci, tilt, orient = null, update = null, anchors = [] }) {
     // outer: tilt about the view centre; inner: zoom scale and offset; object: authored transform
     const outer = new THREE.Group();
     const inner = new THREE.Group().add(object);
@@ -114,6 +128,7 @@ export class DescentScene {
       materials,
       units,
       tilt,
+      orient,
       update,
       anchors,
       opacity: 0,
@@ -132,8 +147,17 @@ export class DescentScene {
     // Fit one world unit to the smaller screen dimension, so "field of view" = the current span.
     const half = Math.tan(THREE.MathUtils.degToRad(FOV / 2));
     this.distance = aspect >= 1 ? 0.5 / half : 0.5 / (half * aspect);
-    // On portrait screens the level card covers the lower part: centre the subject in the upper half.
-    if (aspect < 0.8) this.camera.setViewOffset(w, h, 0, h * 0.2, w, h);
+    this.portrait = aspect < 0.8;
+    this.applyViewOffset(0);
+  }
+
+  // On portrait screens the level card covers the lower part: centre the subject in the upper half,
+  // except while the card is hidden for the fabrication animation (blend → 1).
+  applyViewOffset(blend) {
+    this.offsetBlend = blend;
+    const w = window.innerWidth;
+    const h = window.innerHeight;
+    if (this.portrait) this.camera.setViewOffset(w, h, 0, h * 0.2 * (1 - 0.75 * blend), w, h);
     else this.camera.clearViewOffset();
     this.camera.updateProjectionMatrix();
   }
@@ -144,7 +168,11 @@ export class DescentScene {
     this.camera.position.set(Math.sin(sway) * this.distance, 0.04 * this.distance * Math.sin(this.time * 0.11), Math.cos(sway) * this.distance);
     this.camera.lookAt(0, 0, 0);
 
-    const span = spanAt(progress);
+    const blend = this.fab.blend;
+    if (this.portrait && blend !== this.offsetBlend) this.applyViewOffset(blend);
+    // the fabrication animation pulls the view back a little; the HUD shows what is really on screen
+    const span = spanAt(progress) * this.fab.zoom;
+    this.span = span;
     for (const m of this.models) {
       const opacity = modelOpacity(progress, m.levels);
       m.opacity = opacity;
@@ -152,7 +180,8 @@ export class DescentScene {
       if (!m.outer.visible) continue;
       const scale = m.units / span;
       const [cx, cy, cz] = zoomCentre(progress, m.foci);
-      m.outer.rotation.x = m.tilt(progress);
+      m.outer.rotation.set(m.tilt(progress), 0, 0);
+      m.orient?.(m.outer.quaternion);
       m.inner.scale.setScalar(scale);
       m.inner.position.set(-cx * scale, -cy * scale, -cz * scale);
       m.update?.({ dt, span: span / m.units });

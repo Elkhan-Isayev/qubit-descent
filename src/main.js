@@ -1,6 +1,7 @@
 import { loadChip } from './data.js';
 import { LEVELS, SOURCES } from './levels.js';
-import { LANGS, fmtDecimal, getLang, levelText, onLangChange, setLang, t, translateDom } from './i18n.js';
+import { LANGS, fabStepText, fmtDecimal, getLang, levelText, onLangChange, setLang, t, translateDom } from './i18n.js';
+import { STEPS as FAB_STEPS, TOTAL as FAB_TOTAL } from './fabrication.js';
 import { DescentScene } from './scene.js';
 import { clamp, formatLength, levelAt, levelProgress, spanAt, stepLevel } from './zoom.js';
 
@@ -14,7 +15,12 @@ const state = {
   progress: 0,
   target: 0,
   level: -1,
+  settledAt: 0, // time (ms) the view came to rest on the current level
+  autoPlayed: false, // the junction fabrication plays by itself once, on first arrival
 };
+
+const JUNCTION = LEVELS.findIndex((l) => l.id === 'junction');
+const AUTO_PLAY_DELAY = 900; // ms at rest on the junction level before the animation starts
 
 function buildLangSwitcher() {
   const nav = $('lang');
@@ -63,6 +69,8 @@ function renderCard(i, animate) {
     $('card-text').textContent = text;
     $('card-fab').classList.toggle('none', !fab);
     $('card-fab-text').textContent = fab ?? '';
+    $('fab-play').classList.toggle('hidden', i !== JUNCTION);
+    $('fab-play').querySelector('span').textContent = t('fabPlay');
     $('card-facts').innerHTML = level.facts.map(([k, v]) => `<dt>${t(k)}</dt><dd>${fmtDecimal(v)}</dd>`).join('');
     $('card-sources').innerHTML = level.sources
       .map((id) => `<a href="${SOURCES[id].url}" target="_blank" rel="noopener">${SOURCES[id].label}</a>`)
@@ -150,8 +158,33 @@ function renderLabels(labels) {
   }
 }
 
-function updateHud() {
-  const { value, unit } = formatLength(spanAt(state.progress));
+// Fabrication animation: button, auto-play on first arrival, caption with step and progress.
+function bindFabrication(scene) {
+  const { fab } = scene;
+  const play = () => {
+    fab.play();
+    state.autoPlayed = true;
+  };
+  $('fab-play').addEventListener('click', play);
+  $('fab-stop').addEventListener('click', () => fab.stop());
+  return (now) => {
+    const atRest = Math.abs(state.target - state.progress) < 1e-3 && state.level === JUNCTION;
+    if (!atRest) state.settledAt = now;
+    if (fab.playing && levelAt(state.progress) !== JUNCTION) fab.stop();
+    if (!fab.playing && !state.autoPlayed && atRest && now - state.settledAt > AUTO_PLAY_DELAY) play();
+    const s = fab.state;
+    document.body.classList.toggle('fab-on', !!s);
+    $('fab-caption').classList.toggle('hidden', !s);
+    if (!s) return;
+    $('fab-step').textContent = t('fabStep')(s.index + 1, FAB_STEPS.length);
+    const text = fabStepText(s.index);
+    if ($('fab-text').textContent !== text) $('fab-text').textContent = text;
+    $('fab-bar').style.width = `${Math.min(100, (fab.t / FAB_TOTAL) * 100).toFixed(1)}%`;
+  };
+}
+
+function updateHud(span = spanAt(state.progress)) {
+  const { value, unit } = formatLength(span);
   $('scale-value').textContent = fmtDecimal(value);
   $('scale-unit').textContent = unit;
   $('ruler-head').style.top = `${state.progress * 100}%`;
@@ -179,6 +212,7 @@ async function main() {
   if (import.meta.env.DEV) window.__descent = { scene, state };
   window.addEventListener('resize', () => scene.resize());
   bindInput($('scene'));
+  const updateFab = bindFabrication(scene);
 
   let last = performance.now();
   const frame = (now) => {
@@ -188,7 +222,8 @@ async function main() {
     if (Math.abs(state.target - state.progress) < 1e-5) state.progress = state.target;
     scene.update(state.progress, dt);
     renderLabels(scene.labels());
-    updateHud();
+    updateHud(scene.span);
+    updateFab(now);
     requestAnimationFrame(frame);
   };
   requestAnimationFrame(frame);

@@ -48,6 +48,7 @@
       <div id="card-fab">
         <div class="card-k" data-i18n="howMade">How it is made</div>
         <p id="card-fab-text"></p>
+        <button id="fab-play" class="fab-btn hidden"><svg viewBox="0 0 24 24" width="14" height="14" fill="currentColor"><path d="M7 4.5v15l13-7.5z"/></svg><span></span></button>
       </div>
       <dl id="card-facts"></dl>
       <div class="card-sources"><span class="card-k" data-i18n="sources">Sources</span><span id="card-sources"></span></div>
@@ -57,6 +58,13 @@
     <div id="ruler" class="hidden">
       <div id="ruler-track"></div>
       <div id="ruler-head"></div>
+    </div>
+
+    <!-- fabrication caption -->
+    <div id="fab-caption" class="hidden">
+      <div class="fab-head"><span class="fab-step" id="fab-step"></span><button id="fab-stop" class="text-btn" data-i18n="fabStop">Stop</button></div>
+      <p id="fab-text"></p>
+      <div class="fab-bar"><i id="fab-bar"></i></div>
     </div>
 
     <!-- navigation -->
