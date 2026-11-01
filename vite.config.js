@@ -1,0 +1,12 @@
+import { defineConfig } from 'vite';
+
+// Relative base so the built site works from any folder or static host.
+export default defineConfig({
+  base: './',
+  server: { open: true },
+  build: { chunkSizeWarningLimit: 1200 },
+  test: {
+    environment: 'jsdom',
+    include: ['tests/js/**/*.test.js'],
+  },
+});

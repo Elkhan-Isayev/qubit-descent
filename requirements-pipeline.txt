@@ -1,0 +1,6 @@
+# Generates chip geometry (local only, not in CI). Needs Python 3.10–3.14:
+#   python3.13 -m venv .venv-metal && .venv-metal/bin/pip install --only-binary=:all: -r requirements-pipeline.txt
+quantum-metal==0.9.0
+gdstk
+numpy
+pytest
