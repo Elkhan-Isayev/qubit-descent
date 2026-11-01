@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import { LEVELS } from '../../src/levels.js';
-import { FADE_OUT, formatLength, levelAt, levelProgress, levelTransform, modelOpacity, progressForSpan, spanAt, stepLevel, zoomCentre } from '../../src/zoom.js';
+import { FADE_OUT, formatLength, levelAt, levelProgress, levelTransform, modelOpacity, progressForSpan, spanAt, stepLevel, tiltBetween, zoomCentre } from '../../src/zoom.js';
 
 const N = LEVELS.length;
 const close = (a, b, rel = 1e-9) => expect(Math.abs(a - b) / Math.abs(b)).toBeLessThan(rel);
@@ -110,9 +110,9 @@ describe('zooming into a point of a multi-level model', () => {
   });
 
   it('holds the nearest focus outside the model range', () => {
-    expect(zoomCentre(0, foci)).toEqual([0, 0]);
-    expect(zoomCentre(1, foci)).toEqual([-400, -760]);
-    expect(zoomCentre(0.3, LEVELS.map(() => null))).toEqual([0, 0]);
+    expect(zoomCentre(0, foci)).toEqual([0, 0, 0]);
+    expect(zoomCentre(1, foci)).toEqual([-400, -760, 0]);
+    expect(zoomCentre(0.3, LEVELS.map(() => null))).toEqual([0, 0, 0]);
   });
 
   it('a model is as visible as its most visible level', () => {
@@ -124,6 +124,29 @@ describe('zooming into a point of a multi-level model', () => {
     // fades in and out like a single level at the ends of its run
     expect(modelOpacity(levelProgress(1.5), [2, 3])).toBe(levelTransform(levelProgress(1.5), 2).opacity);
     expect(modelOpacity(levelProgress(3.2), [2, 3])).toBe(levelTransform(levelProgress(3.2), 3).opacity);
+  });
+});
+
+describe('3D foci and tilt', () => {
+  it('interpolates z like x and y, and treats 2D foci as z = 0', () => {
+    const foci = LEVELS.map(() => null);
+    foci[4] = [10, 20];
+    foci[5] = [10, 20, 0.031];
+    expect(zoomCentre(levelProgress(4), foci)).toEqual([10, 20, 0]);
+    const [, , z] = zoomCentre(levelProgress(5), foci);
+    expect(z).toBeCloseTo(0.031, 12);
+    // halfway in log-span the span is √(s4·s5); zoom-to-point is then (s4 − s)/(s4 − s5) of the way there
+    const s = Math.sqrt(LEVELS[4].span * LEVELS[5].span);
+    const frac = (LEVELS[4].span - s) / (LEVELS[4].span - LEVELS[5].span);
+    expect(zoomCentre(levelProgress(4.5), foci)[2]).toBeCloseTo(0.031 * frac, 12);
+  });
+
+  it('turns the view smoothly between two levels and holds it outside', () => {
+    expect(tiltBetween(levelProgress(3), 4, 5, -0.6, -1.3)).toBe(-0.6);
+    expect(tiltBetween(levelProgress(4), 4, 5, -0.6, -1.3)).toBe(-0.6);
+    expect(tiltBetween(levelProgress(4.5), 4, 5, -0.6, -1.3)).toBeCloseTo(-0.95, 12);
+    expect(tiltBetween(levelProgress(5), 4, 5, -0.6, -1.3)).toBeCloseTo(-1.3, 12);
+    expect(tiltBetween(1, 4, 5, -0.6, -1.3)).toBeCloseTo(-1.3, 12);
   });
 });
 

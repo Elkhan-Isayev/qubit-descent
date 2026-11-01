@@ -52,10 +52,12 @@ export function levelTransform(p, i) {
   };
 }
 
-// View centre (in a model's own units) while zooming through a model that spans several levels.
-// foci[i] is the point centred at level i, or null when the model has no focus for that level.
+// View centre (in a model's own units, [x, y, z]) while zooming through a model that spans several levels.
+// foci[i] is the point centred at level i ([x, y] or [x, y, z]), or null when the model has no focus there.
 // Between two foci the view zooms into a fixed point: the next focus is approached linearly in span,
 // so it lands exactly on screen centre as the span reaches the next level.
+const xyz = (f) => [f[0], f[1], f[2] ?? 0];
+
 export function zoomCentre(p, foci) {
   const u = clamp(p) * LAST;
   const i = Math.min(Math.floor(u), LAST - 1);
@@ -64,7 +66,8 @@ export function zoomCentre(p, foci) {
   if (a && b) {
     const s = spanAt(p);
     const t = (s - LEVELS[i + 1].span) / (LEVELS[i].span - LEVELS[i + 1].span);
-    return [b[0] + (a[0] - b[0]) * t, b[1] + (a[1] - b[1]) * t];
+    const [A, B] = [xyz(a), xyz(b)];
+    return B.map((v, k) => v + (A[k] - v) * t);
   }
   // outside the model's range: hold the nearest focus
   let best = null;
@@ -72,7 +75,14 @@ export function zoomCentre(p, foci) {
   foci.forEach((f, k) => {
     if (f && Math.abs(k - u) < bestD) [best, bestD] = [f, Math.abs(k - u)];
   });
-  return best ?? [0, 0];
+  return xyz(best ?? [0, 0]);
+}
+
+// Viewing angle that turns from `from` to `to` (radians) while zooming from level i to level j,
+// e.g. from looking down onto the chip to a side-on cross-section of the tunnel barrier.
+export function tiltBetween(p, i, j, from, to) {
+  const t = smoothstep(clamp((clamp(p) * LAST - i) / (j - i)));
+  return from + (to - from) * t;
 }
 
 // Opacity of a model drawn on a contiguous run of levels: solid across the run, cross-fading only

@@ -64,6 +64,22 @@ Cable lengths give realistic plate spacing for the procedural model. The same pa
 - Intel Tunnel Falls, 12-qubit silicon spin chip, 300 mm wafers, EUV, 95 % yield, per [Intel newsroom (2023)](https://www.intel.com/content/www/us/en/newsroom/news/quantum-computing-chip-to-advance-research.html); preprint: *12-spin-qubit arrays fabricated on a 300 mm semiconductor manufacturing line*, arXiv:2410.16583.
 - imec: Elsayed, A. et al. (2024). *Low charge noise quantum dots with industrial CMOS manufacturing.* **npj Quantum Information** 10. [doi:10.1038/s41534-024-00864-3](https://doi.org/10.1038/s41534-024-00864-3); arXiv:2212.06464. 300 mm line, mean charge noise **0.61 µeV/√Hz** at 1 Hz.
 
-## 3. Rules carried forward
+## 3. Geometry parameters (shape the 3D models, never shown as numbers)
+
+| Level | Parameter | Value | Basis |
+|---|---|---|---|
+| 1 | Plate spacing | 200 / 290 / 250 / 170 / 140 mm | Coax lengths between stages, Krinner et al. 2019, Table 1 (used as an approximation of plate spacing) |
+| 1 | Plate diameters, rods, coax count, pulse tube, dilution unit | illustrative | — |
+| 2 | Holder, board, SMA connectors, bond wires (Ø 25 µm) | illustrative | Pad positions come from the chip's launch pads |
+| 5 | Junction overlap | 200 × 200 nm = 0.04 µm² | Inside 0.01–0.16 µm² (Osman et al. 2021) |
+| 5 | Electrode thicknesses 30 / 50 nm, oxide 2 nm | illustrative | — |
+| 6 | Barrier thickness field | smooth random surface scaled to exactly 1–2 nm; thinnest 7 % = hot spots | Zeng et al. 2015 (~1–2 nm, < 10 % of the area carries the current) |
+| 6 | Al lattice constant | 0.405 nm (fcc) | Standard crystallographic value for aluminium |
+| 6 | Oxide density | 88 atoms/nm³ (amorphous Al₂O₃ at ~3 g/cm³), Al : O = 2 : 3 | Stoichiometry; density approximate |
+| 6 | Cooper pairs crossing hot spots | stylised | — |
+| 7 | Si lattice constant | 0.543 nm (diamond) | NIST CODATA |
+| 7 | Donor electron cloud and spin arrow | stylised | — |
+
+## 4. Rules carried forward
 - No figures or images copied from papers: numbers only, plus our own 3D reconstruction.
 - Labels name the organization of the *source*. A representative chip is never labeled as a vendor's product.

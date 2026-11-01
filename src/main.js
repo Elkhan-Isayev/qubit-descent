@@ -132,6 +132,24 @@ function toggleCredits(open) {
   $('credits').classList.toggle('hidden', !open);
 }
 
+// Labels pinned to 3D points (e.g. the fridge stages): created on first use, re-translated on language change.
+const labelEls = new Map();
+function renderLabels(labels) {
+  for (const l of labels) {
+    let el = labelEls.get(l.key);
+    if (!el) {
+      el = document.createElement('div');
+      el.className = 'label3d';
+      $('labels').appendChild(el);
+      labelEls.set(l.key, el);
+    }
+    const html = `<span>${t(l.key)}</span><b>${fmtDecimal(l.text)}</b>`;
+    if (el.dataset.html !== html) el.innerHTML = el.dataset.html = html;
+    el.style.opacity = l.opacity;
+    el.style.transform = l.opacity > 0.01 ? `translate(${l.x.toFixed(1)}px, ${l.y.toFixed(1)}px) translateY(-50%)` : 'translate(-9999px, 0)';
+  }
+}
+
 function updateHud() {
   const { value, unit } = formatLength(spanAt(state.progress));
   $('scale-value').textContent = fmtDecimal(value);
@@ -169,6 +187,7 @@ async function main() {
     state.progress += (state.target - state.progress) * (1 - Math.exp(-SMOOTHING * dt));
     if (Math.abs(state.target - state.progress) < 1e-5) state.progress = state.target;
     scene.update(state.progress, dt);
+    renderLabels(scene.labels());
     updateHud();
     requestAnimationFrame(frame);
   };

@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { DIAMOND_BASIS, diamondLattice } from '../../src/levels/placeholders.js';
+import { DIAMOND_BASIS, bonds, diamondLattice } from '../../src/levels/atom.js';
 
 describe('silicon diamond lattice', () => {
   it('has 8 atoms per conventional cell', () => {
@@ -14,5 +14,17 @@ describe('silicon diamond lattice', () => {
     const nn = Math.min(...d);
     expect(nn).toBeCloseTo(Math.sqrt(3) / 4, 12);
     expect(d.filter((v) => Math.abs(v - nn) < 1e-9)).toHaveLength(4);
+  });
+});
+
+describe('silicon bonds', () => {
+  it('every atom fully inside the block has exactly four bonds', () => {
+    const pts = diamondLattice(3);
+    const pairs = bonds(pts);
+    const degree = new Array(pts.length).fill(0);
+    for (const [i, j] of pairs) degree[i]++, degree[j]++;
+    pts.forEach((p, i) => {
+      if (p.every((v) => v >= 0.5 && v <= 2.25)) expect(degree[i]).toBe(4);
+    });
   });
 });
