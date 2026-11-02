@@ -18,6 +18,8 @@ On every level: what the part is, how it is *made*, and where each number comes 
 
 <sub>Higher quality: <a href="docs/qubit-descent.mp4">docs/qubit-descent.mp4</a></sub>
 
+<sub>Cinematic cut: <a href="docs/qubit-descent-cinematic.mp4">docs/qubit-descent-cinematic.mp4</a>. Levels are real renders from the site; the camera moves between them are AI-generated (Higgsfield) and illustrative.</sub>
+
 </div>
 
 ---
