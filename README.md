@@ -6,6 +6,7 @@
 On every level: what the part is, how it is *made*, and where each number comes from.
 
 [![Live demo](https://img.shields.io/badge/▶_Live_demo-elkhan--isayev.github.io-2f7fd6?style=for-the-badge)](https://elkhan-isayev.github.io/qubit-descent/)
+[![Watch the video](https://img.shields.io/badge/🎬_Watch_the_video-36_s-b5701c?style=for-the-badge)](docs/qubit-descent-cinematic.mp4)
 
 [![CI](https://github.com/Elkhan-Isayev/qubit-descent/actions/workflows/deploy.yml/badge.svg)](https://github.com/Elkhan-Isayev/qubit-descent/actions/workflows/deploy.yml)
 ![Three.js](https://img.shields.io/badge/Three.js-r186-000?logo=threedotjs&logoColor=white)
